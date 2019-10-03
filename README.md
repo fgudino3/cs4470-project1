@@ -1,1 +1,1 @@
-# cs4470-project1
+# cs4470 projects

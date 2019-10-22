@@ -21,7 +21,7 @@ public class Project
         
         while (trace < 0)
         {
-        	trace = 1;
+        	trace = 3;
 //            System.out.print("Enter trace level (>= 0): [0] ");
 //            try
 //            {
@@ -83,7 +83,7 @@ public class Project
 
         while (seed < 1)
         {
-        	seed = 1;
+        	seed = 195;
 //            System.out.print("Enter random seed: [random] ");
 //            try
 //            {

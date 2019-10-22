@@ -59,10 +59,16 @@ public class Entity1 extends Entity
     // details.
     public void update(Packet p)
     {
+    	System.out.println(
+    			"___________________________________________\r\n" + 
+    			"         Node 1 started updating         \n" + 
+    			"___________________________________________"
+        	);
+    	printDT();
     	boolean tableUpdated = false;
     	int source = p.getSource();
         int dest = p.getDest();
-        
+//        System.out.println("source: " + source);
         // update this entities distance tables from neighbors packet
     	for (int i=0; i < NetworkSimulator.NUMENTITIES; i++){
     		distanceTable[source][i] = p.getMincost(i);
@@ -85,6 +91,15 @@ public class Entity1 extends Entity
         		NetworkSimulator.toLayer2(entityPacket);
         	}
     	}
+//    	System.out.println("source: " + source);
+//    	System.out.println("dest: " + dest);
+    	
+    	System.out.println(
+			"___________________________________________\r\n" + 
+			"         Node 1 finished updating        \n" + 
+			"___________________________________________"
+    	);
+    	printDT();
     }
     
     public void linkCostChangeHandler(int whichLink, int newCost)

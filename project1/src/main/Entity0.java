@@ -63,10 +63,12 @@ public class Entity0 extends Entity
     	);
     	// TODO: implement distance vector algorithm update distanceTable and
     	// send each entity the new minCost array
+    	printDT();
+    	
     	boolean tableUpdated = false;
     	int source = p.getSource();
         int dest = p.getDest();
-        
+//        System.out.println("source: " + source);
         // update this entities distance tables from neighbors packet
     	for (int i=0; i < NetworkSimulator.NUMENTITIES; i++){
     		distanceTable[source][i] = p.getMincost(i);
@@ -85,17 +87,18 @@ public class Entity0 extends Entity
     		int[] minCost = new int[NetworkSimulator.NUMENTITIES];
     		System.arraycopy(distanceTable[entity], 0, minCost, 0, NetworkSimulator.NUMENTITIES);
     		for (int i=0; i < neighbors.length; i++){
-        		Packet entityPacket = new Packet(0, neighbors[i], minCost);
+        		Packet entityPacket = new Packet(entity, neighbors[i], minCost);
         		NetworkSimulator.toLayer2(entityPacket);
         	}
     	}
-
-    	printDT();
+//    	System.out.println("source: " + source);
+//    	System.out.println("dest: " + dest);
     	System.out.println(
 			"___________________________________________\r\n" + 
 			"         Node 0 finished updating        \n" + 
 			"___________________________________________"
     	);
+    	printDT();
     }
     
     public void linkCostChangeHandler(int whichLink, int newCost)

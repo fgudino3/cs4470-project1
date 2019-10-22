@@ -2,9 +2,54 @@ package main;
 
 public class Entity1 extends Entity
 {    
+	private int[] neighbors = new int[]{0, 2};
+	private int entity = 1;
+
     // Perform any necessary initialization in the constructor
     public Entity1()
     {
+    	System.out.println(
+    			"___________________________________________\r\n" + 
+    			"            Node 1 Initialized           \n" + 
+    			"___________________________________________"
+    	);
+    	
+    	// distance to Entity0
+    	distanceTable[0][0] = 0;
+    	distanceTable[0][1] = 999;
+    	distanceTable[0][2] = 999;
+    	distanceTable[0][3] = 999;
+    	
+    	// distance to Entity1
+    	distanceTable[1][0] = 1;
+    	distanceTable[1][1] = 0;
+    	distanceTable[1][2] = 1;
+    	distanceTable[1][3] = 999;
+    	
+    	// distance to Entity2
+    	distanceTable[2][0] = 999;
+    	distanceTable[2][1] = 999;
+    	distanceTable[2][2] = 0;
+    	distanceTable[2][3] = 999;
+    	
+    	// distance to Entity3
+    	distanceTable[3][0] = 999;
+    	distanceTable[3][1] = 999;
+    	distanceTable[3][2] = 999;
+    	distanceTable[3][3] = 0;
+    	
+    	// print initial distance table
+    	printDT();
+    	
+    	// store the minimum costs from entity1
+    	int[] minCost = new int[NetworkSimulator.NUMENTITIES];
+    	System.arraycopy(distanceTable[entity], 0, minCost, 0, NetworkSimulator.NUMENTITIES);
+    	
+    	int[] neighbors = new int[] {0, 2};
+    	for (int i=0; i < neighbors.length; i++){
+    		Packet entityPacket = new Packet(entity, neighbors[i], minCost);
+    		NetworkSimulator.toLayer2(entityPacket);
+    	}
     }
     
     // Handle updates when a packet is received.  Students will need to call
@@ -14,6 +59,32 @@ public class Entity1 extends Entity
     // details.
     public void update(Packet p)
     {
+    	boolean tableUpdated = false;
+    	int source = p.getSource();
+        int dest = p.getDest();
+        
+        // update this entities distance tables from neighbors packet
+    	for (int i=0; i < NetworkSimulator.NUMENTITIES; i++){
+    		distanceTable[source][i] = p.getMincost(i);
+    	}
+        
+    	// update entities own distance table
+    	for (int i=0; i < NetworkSimulator.NUMENTITIES; i++){
+    		if(distanceTable[entity][i] > (distanceTable[entity][source] + p.getMincost(i))) {
+    			distanceTable[entity][i] = distanceTable[entity][source] + p.getMincost(i);
+    			tableUpdated = true;
+    		}
+    	}
+        
+    	// send out updated table from this entity
+    	if(tableUpdated) {
+    		int[] minCost = new int[NetworkSimulator.NUMENTITIES];
+    		System.arraycopy(distanceTable[entity], 0, minCost, 0, NetworkSimulator.NUMENTITIES);
+    		for (int i=0; i < neighbors.length; i++){
+        		Packet entityPacket = new Packet(entity, neighbors[i], minCost);
+        		NetworkSimulator.toLayer2(entityPacket);
+        	}
+    	}
     }
     
     public void linkCostChangeHandler(int whichLink, int newCost)

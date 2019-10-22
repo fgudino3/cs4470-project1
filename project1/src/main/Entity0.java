@@ -2,12 +2,16 @@ package main;
 
 public class Entity0 extends Entity
 {    
+	private int[] neighbors = new int[]{1, 2, 3};
+	private int entity = 0;
+
     // Perform any necessary initialization in the constructor
     public Entity0() {
-    	System.out.println("___________________________________________\r\n" + 
-    			"            Node 0 Initialized           \n" + 
-    			"___________________________________________");
-    	
+    	System.out.println(
+				"___________________________________________\r\n" + "            Node 0 Initialized           \n"
+						+ "___________________________________________"
+    	);
+
     	// distance to Entity0
     	distanceTable[0][0] = 0;
     	distanceTable[0][1] = 1;
@@ -37,18 +41,13 @@ public class Entity0 extends Entity
     	
     	// store the minimum costs from entity0
     	int[] minCost = new int[NetworkSimulator.NUMENTITIES];
-    	
-    	System.arraycopy(distanceTable[0], 0, minCost, 0, NetworkSimulator.NUMENTITIES);
+    	System.arraycopy(distanceTable[entity], 0, minCost, 0, NetworkSimulator.NUMENTITIES);
     	
     	// create packets for each neighbor
-    	Packet entity1Packet = new Packet(0, 1, minCost);
-    	Packet entity2Packet = new Packet(0, 2, minCost);
-    	Packet entity3Packet = new Packet(0, 3, minCost);
-    	
-    	// send each neighbor its respective packet
-    	NetworkSimulator.toLayer2(entity1Packet);
-    	NetworkSimulator.toLayer2(entity2Packet);
-    	NetworkSimulator.toLayer2(entity3Packet);
+    	for (int i=0; i < neighbors.length; i++){
+    		Packet entityPacket = new Packet(entity, neighbors[i], minCost);
+    		NetworkSimulator.toLayer2(entityPacket);
+    	}
     }
     
     // Handle updates when a packet is received.  Students will need to call
@@ -57,26 +56,46 @@ public class Entity0 extends Entity
     // the packet correctly.  Read the warning in NetworkSimulator.java for more
     // details.
     public void update(Packet p) {
-    	System.out.println("___________________________________________\r\n" + 
-    			"         Node 0 started updating         \n" + 
-    			"___________________________________________");
+    	System.out.println(
+			"___________________________________________\r\n" + 
+			"         Node 0 started updating         \n" + 
+			"___________________________________________"
+    	);
     	// TODO: implement distance vector algorithm update distanceTable and
     	// send each entity the new minCost array
-    	int[] minCost = new int[NetworkSimulator.NUMENTITIES];
-    	
-    	// create packets for each neighbor
-    	Packet entity1Packet = new Packet(0, 1, minCost);
-    	Packet entity2Packet = new Packet(0, 2, minCost);
-    	Packet entity3Packet = new Packet(0, 3, minCost);
-    	
-    	// send each neighbor its respective packet
-    	NetworkSimulator.toLayer2(entity1Packet);
-    	NetworkSimulator.toLayer2(entity2Packet);
-    	NetworkSimulator.toLayer2(entity3Packet);
-    	
-    	System.out.println("___________________________________________\r\n" + 
-    			"         Node 0 finished updating        \n" + 
-    			"___________________________________________");
+    	boolean tableUpdated = false;
+    	int source = p.getSource();
+        int dest = p.getDest();
+        
+        // update this entities distance tables from neighbors packet
+    	for (int i=0; i < NetworkSimulator.NUMENTITIES; i++){
+    		distanceTable[source][i] = p.getMincost(i);
+    	}
+        
+    	// update entities own distance table
+    	for (int i=0; i < NetworkSimulator.NUMENTITIES; i++){
+    		if(distanceTable[entity][i] > (distanceTable[entity][source] + p.getMincost(i))) {
+    			distanceTable[entity][i] = distanceTable[entity][source] + p.getMincost(i);
+    			tableUpdated = true;
+    		}
+    	}
+        
+    	// send out updated table from this entity
+    	if(tableUpdated) {
+    		int[] minCost = new int[NetworkSimulator.NUMENTITIES];
+    		System.arraycopy(distanceTable[entity], 0, minCost, 0, NetworkSimulator.NUMENTITIES);
+    		for (int i=0; i < neighbors.length; i++){
+        		Packet entityPacket = new Packet(0, neighbors[i], minCost);
+        		NetworkSimulator.toLayer2(entityPacket);
+        	}
+    	}
+
+    	printDT();
+    	System.out.println(
+			"___________________________________________\r\n" + 
+			"         Node 0 finished updating        \n" + 
+			"___________________________________________"
+    	);
     }
     
     public void linkCostChangeHandler(int whichLink, int newCost)

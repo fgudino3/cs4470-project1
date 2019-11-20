@@ -17,6 +17,8 @@ public class Server extends Thread {
 	protected String host;
 	
 	protected boolean isUppercase = false;
+	protected boolean isReverse = false;
+	protected boolean isExit = false;
 	
 	protected final ArrayList<String> uppercaseWords = new ArrayList<String>();
 
@@ -52,13 +54,15 @@ public class Server extends Thread {
 					response = "200 OK";
 					System.out.println(host + " sends UPPERCASE");
 				}  else if (request.equals("LOWERCASE")) {
-					// TODO implement
+					
 					System.out.println(host + " sends LOWERCASE");
 				}  else if (request.equals("REVERSE")) {
-					// TODO implement
+					isReverse = true;
+					response = "200 OK";
 					System.out.println(host + " sends REVERSE");
 				}  else if (request.equals("EXIT")) {
-					// TODO implement
+					response = "200 OK";
+					isExit = true;
 					System.out.println(host + " sends EXIT");
 				} else if (isUppercase) {
 					// while upper case is active
@@ -72,15 +76,23 @@ public class Server extends Thread {
 					} else {	
 						uppercaseWords.add(request);
 					}
-				} else {
+				} else if (isReverse) {
+					StringBuilder reverseString = new StringBuilder();
+					reverseString.append(request);
+					response = reverseString.reverse().toString();
+					isReverse = false;
+				}
+				else {
 					response = "400: Not a valid command!";
 					System.out.println(response);
 				}
 				
 				response += '\n';
 				out.write(response.getBytes());
+				if(isExit) {
+					break;
+				}
 			}
-
 		} catch (IOException ex) {
 			System.out.println(host + " has disconnected");
 		} finally {
@@ -110,8 +122,7 @@ public class Server extends Thread {
 			System.out.println("Unable to start server.");
 		} finally {
 			try {
-				if (server != null)
-					server.close();
+				if (server != null) server.close();
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}

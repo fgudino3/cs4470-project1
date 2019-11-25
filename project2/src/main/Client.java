@@ -52,9 +52,7 @@ public class Client {
 			while (true) {
 				System.out.print("client: ");
 				String userInput = stdIn.readLine();
-				if ("EXIT".equals(userInput)) {
-					break;
-				}
+				
 				out.println(userInput);
 				String serverInput = in.readLine();
 				if (!serverInput.equals("")) {
@@ -68,6 +66,9 @@ public class Client {
 						System.out.println("server: " + serverInput);
 					}
 					
+				}
+				if ("EXIT".equals(userInput)) {
+					break;
 				}
 			}
 

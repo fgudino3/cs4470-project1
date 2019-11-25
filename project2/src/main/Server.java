@@ -17,8 +17,12 @@ public class Server extends Thread {
 	protected String host;
 	
 	protected boolean isUppercase = false;
+	protected boolean isLowercase = false;
+	protected boolean isReverse = false;
+	protected boolean isExit = false;
 	
 	protected final ArrayList<String> uppercaseWords = new ArrayList<String>();
+	protected final ArrayList<String> lowercaseWords = new ArrayList<String>();
 
 	private Server(Socket socket) {
 		this.socket = socket;
@@ -52,13 +56,16 @@ public class Server extends Thread {
 					response = "200 OK";
 					System.out.println(host + " sends UPPERCASE");
 				}  else if (request.equals("LOWERCASE")) {
-					// TODO implement
+					isLowercase = true;
+					response = "200 OK";
 					System.out.println(host + " sends LOWERCASE");
 				}  else if (request.equals("REVERSE")) {
-					// TODO implement
+					isReverse = true;
+					response = "200 OK";
 					System.out.println(host + " sends REVERSE");
 				}  else if (request.equals("EXIT")) {
-					// TODO implement
+					response = "200 OK";
+					isExit = true;
 					System.out.println(host + " sends EXIT");
 				} else if (isUppercase) {
 					// while upper case is active
@@ -69,9 +76,26 @@ public class Server extends Thread {
 						uppercaseWords.clear(); // empty list
 						response = response.substring(0, response.length()); // remove last '-'
 						isUppercase = false;
-					} else {	
+					} else {
 						uppercaseWords.add(request);
 					}
+				} else if (isLowercase) {
+
+					if (request.equals(".")) {
+						for (String word: lowercaseWords) {
+							response += word.toLowerCase() + "-";
+						}
+						lowercaseWords.clear(); // empty list
+						response = response.substring(0, response.length()); // remove last '-'
+						isLowercase = false;
+					} else {	
+						lowercaseWords.add(request);
+					}
+				} else if (isReverse) {
+					StringBuilder reverseString = new StringBuilder();
+					reverseString.append(request);
+					response = reverseString.reverse().toString();
+					isReverse = false;
 				} else {
 					response = "400: Not a valid command!";
 					System.out.println(response);
@@ -79,6 +103,10 @@ public class Server extends Thread {
 				
 				response += '\n';
 				out.write(response.getBytes());
+				
+				if(isExit) {
+					break;
+				}
 			}
 
 		} catch (IOException ex) {
